@@ -1,0 +1,92 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  password    String
+  usdBalance  BigInt   @default(500000) // decimal 2, so $5000
+  createdAt   DateTime @default(now())
+  username    String?
+  firstName    String?
+  lastName    String?
+  lastLoginAt   DateTime?
+
+  trades      Trade[]
+}
+
+model Asset {
+  id        String   @id @default(uuid())
+  name      String   // "Bitcoin"
+  symbol    String   @unique // "BTC"
+  decimals  Int      @default(4)
+  imageUrl  String?
+
+  candles   Candle[]
+  trades    Trade[]
+}
+
+model Candle {
+  id        String  @id @default(uuid())
+  assetId   String
+  timeframe String  // "1m" | "5m" | "1h" | "1d"
+  openTime  BigInt  // unix timestamp ms (start of window)
+  open      BigInt
+  high      BigInt
+  low       BigInt
+  close     BigInt
+  decimals  Int     @default(4)
+
+  asset     Asset   @relation(fields: [assetId], references: [id])
+
+  @@unique([assetId, timeframe, openTime])
+  @@index([assetId, timeframe, openTime])
+}
+
+model Trade {
+  id          String      @id @default(uuid())
+  userId      String
+  assetId     String
+  type        TradeType   // "buy" | "sell"
+  margin      BigInt      // decimal 2
+  leverage    Int
+  exposure    BigInt      // margin * leverage, decimal 2
+  openPrice   BigInt      // decimal 4
+  closePrice  BigInt?     // null while open
+  
+  takeProfit   BigInt?
+  stopLoss    BigInt?
+
+  pnl         BigInt?     // null while open, decimal 2
+  status      TradeStatus @default(OPEN)
+  openedAt    DateTime    @default(now())
+  closedAt    DateTime?
+
+  user        User        @relation(fields: [userId], references: [id])
+  asset       Asset       @relation(fields: [assetId], references: [id])
+
+  @@index([userId, status])
+  @@index([assetId, status])  // for liquidation checks — query all open trades per asset
+}
+
+enum TradeType {
+  BUY
+  SELL
+}
+
+enum TradeStatus {
+  OPEN
+  CLOSED
+  LIQUIDATED
+}
