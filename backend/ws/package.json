@@ -10,7 +10,6 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "@exness/db": "workspace:*",
     "@exness/shared": "workspace:*",
     "@types/ws": "^8.18.1",
     "express": "^5.2.1",

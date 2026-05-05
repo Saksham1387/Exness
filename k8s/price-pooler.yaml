@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: price-pooler
+  namespace: default
+spec:
+  # Exactly 1 replica — multiple poolers would produce duplicate candle entries in Redis.
+  replicas: 1
+  selector:
+    matchLabels:
+      app: price-pooler
+  template:
+    metadata:
+      labels:
+        app: price-pooler
+    spec:
+      containers:
+        - name: price-pooler
+          image: your-registry/exness-price-pooler:latest
+          imagePullPolicy: Always
+          env:
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: exness-secrets
+                  key: REDIS_URL
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"

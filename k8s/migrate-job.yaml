@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: prisma-migrate
+  namespace: default
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          # Reuse the http image — it already has the Prisma binary and schema
+          image: your-registry/exness-http:latest
+          command:
+            - sh
+            - -c
+            - "cd backend/db && bunx prisma migrate deploy"
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: exness-secrets
+                  key: DATABASE_URL
+  backoffLimit: 3

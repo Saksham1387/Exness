@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: http-api
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: http-api
+  template:
+    metadata:
+      labels:
+        app: http-api
+    spec:
+      containers:
+        - name: http-api
+          # Replace with your actual image name after pushing to a registry
+          image: your-registry/exness-http:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: exness-secrets
+                  key: DATABASE_URL
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: exness-secrets
+                  key: JWT_SECRET
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: exness-secrets
+                  key: REDIS_URL
+            - name: PORT
+              value: "3000"
+          readinessProbe:
+            httpGet:
+              path: /api/v1/assets
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/v1/assets
+              port: 3000
+            initialDelaySeconds: 20
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: http-api-service
+  namespace: default
+spec:
+  selector:
+    app: http-api
+  ports:
+    - port: 80
+      targetPort: 3000
+  type: ClusterIP
