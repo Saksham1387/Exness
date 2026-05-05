@@ -1,6 +1,6 @@
 # Exness-TS: High-Performance Trading Platform
 
-![Platform Screenshot](./platform-screenshot.png)
+![Platform Screenshot](./platform-ss.png)
 
 Exness-TS is a professional-grade trading platform prototype built with TypeScript, Bun, and React. It features real-time price streaming, advanced charting, and a comprehensive margin trading engine with risk management tools.
 
