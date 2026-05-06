@@ -75,10 +75,10 @@
     "backend/ws": {
       "name": "ws",
       "dependencies": {
-        "@exness/db": "workspace:*",
         "@exness/shared": "workspace:*",
         "@types/ws": "^8.18.1",
         "express": "^5.2.1",
+        "redis": "^5.12.1",
         "ws": "^8.20.0",
       },
       "devDependencies": {
