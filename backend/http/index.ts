@@ -41,8 +41,13 @@ await subscriber.subscribe(channels, async (message) => {
     }
   });
 
+  // Convert at the boundary: WS payload carries scaled-integer numbers (×10,000).
+  // Inside checkTrade everything stays in BigInt so PnL math is exact.
+  const buyPrice = BigInt(update.buyPrice);
+  const sellPrice = BigInt(update.sellPrice);
+
   for (const trade of openTrades) {
-    await checkTrade(trade, update.buyPrice, update.sellPrice);
+    await checkTrade(trade, buyPrice, sellPrice);
   }
 });
 
