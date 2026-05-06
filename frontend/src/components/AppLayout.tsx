@@ -6,7 +6,6 @@ import { useAssetsStore } from "@/store/assets";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,60 +57,72 @@ export default function AppLayout() {
 
   return (
     <div className="h-screen flex flex-col bg-surface text-foreground overflow-hidden">
-      <header className="flex items-center justify-between h-12 px-5 border-b border-border bg-surface-1 shrink-0">
-        <Link
-          to="/"
-          className="text-accent font-semibold text-[13px] tracking-widest uppercase hover:opacity-80 transition-opacity"
-        >
-          Exness
-        </Link>
+      <header className="flex items-center justify-between h-14 px-6 border-b border-border bg-surface-1 shrink-0">
+        <div className="flex items-center gap-6">
+          <Link
+            to="/"
+            className="text-accent font-bold text-base tracking-wide hover:opacity-80 transition-opacity"
+          >
+            Exness
+          </Link>
 
-        <div className="flex items-center gap-5">
+          <nav className="hidden md:flex items-center gap-1">
+            <Link
+              to="/"
+              className="px-3 py-1.5 rounded-md text-sm text-muted hover:text-white hover:bg-surface-2 transition-colors"
+            >
+              Markets
+            </Link>
+          </nav>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <Badge
+            variant="outline"
+            className={`text-xs gap-1.5 border-border px-2.5 py-1 ${
+              connected ? "text-green" : "text-red"
+            }`}
+          >
+            <span className={`w-2 h-2 rounded-full ${connected ? "bg-green" : "bg-red"}`} />
+            {connected ? "Live" : "Offline"}
+          </Badge>
+
+          <div className="h-5 w-px bg-border" />
+
           <span className="tabular-nums font-medium text-sm text-white">
             ${balance.toLocaleString("en-US", {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
-            })}{" "}
-            <span className="text-muted text-xs font-normal">USD</span>
+            })}
           </span>
 
-          <Separator orientation="vertical" className="h-5 bg-border" />
-
-          <Badge
-            variant="outline"
-            className={`text-[10px] gap-1.5 border-border px-2 py-0.5 ${
-              connected ? "text-green" : "text-red"
-            }`}
-          >
-            <span className={`w-1.5 h-1.5 rounded-full ${connected ? "bg-green" : "bg-red"}`} />
-            {connected ? "Live" : "Offline"}
-          </Badge>
+          <div className="h-5 w-px bg-border" />
 
           <DropdownMenu>
             <DropdownMenuTrigger className="flex items-center gap-2 outline-none group">
-              <Avatar size="sm" className="bg-accent">
-                <AvatarFallback className="bg-accent text-surface text-[10px] font-bold">
+              <Avatar className="w-8 h-8 bg-accent">
+                <AvatarFallback className="bg-accent text-surface text-xs font-bold">
                   {getInitials()}
                 </AvatarFallback>
               </Avatar>
-              <ChevronDown className="size-3 text-muted group-hover:text-white transition-colors group-data-[state=open]:rotate-180 duration-200" />
+              <ChevronDown className="size-3.5 text-muted group-hover:text-white transition-colors group-data-[state=open]:rotate-180 duration-200" />
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end" className="w-52 bg-surface-1 border-border">
+            <DropdownMenuContent align="end" className="w-56 bg-surface-1 border-border">
               <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col gap-0.5">
-                  <p className="text-xs font-medium text-white truncate">
+                <div className="flex flex-col gap-1">
+                  <p className="text-sm font-medium text-white truncate">
                     {user?.username || user?.email}
                   </p>
-                  <p className="text-[10px] text-muted truncate">
+                  <p className="text-xs text-muted truncate">
                     {user?.email}
                   </p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-border" />
-              <DropdownMenuItem asChild className="cursor-pointer text-muted hover:text-white text-xs">
+              <DropdownMenuItem asChild className="cursor-pointer text-muted hover:text-white text-sm">
                 <Link to="/settings">
-                  <Settings className="size-3.5 mr-1.5" />
+                  <Settings className="size-4 mr-2" />
                   Settings
                 </Link>
               </DropdownMenuItem>
@@ -119,9 +130,9 @@ export default function AppLayout() {
               <DropdownMenuItem
                 onClick={handleLogout}
                 variant="destructive"
-                className="cursor-pointer text-red text-xs"
+                className="cursor-pointer text-red text-sm"
               >
-                <LogOut className="size-3.5 mr-1.5" />
+                <LogOut className="size-4 mr-2" />
                 Logout
               </DropdownMenuItem>
             </DropdownMenuContent>

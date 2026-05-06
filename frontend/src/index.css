@@ -7,38 +7,38 @@
 @theme inline {
     --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
 
-    --color-surface: #0b0e14;
-    --color-surface-1: #10141c;
-    --color-surface-2: #161b25;
-    --color-border: #1e2433;
-    --color-muted: #565e70;
-    --color-foreground: #c5cbd6;
-    --color-white: #e8ecf2;
-    --color-accent: #d4a843;
-    --color-green: #22c55e;
-    --color-red: #ef4444;
+    --color-surface: #0e1118;
+    --color-surface-1: #141720;
+    --color-surface-2: #1c1f2b;
+    --color-border: #262a36;
+    --color-muted: #6b7280;
+    --color-foreground: #d1d5db;
+    --color-white: #f1f5f9;
+    --color-accent: #e2b340;
+    --color-green: #16c784;
+    --color-red: #ea3943;
 
-    --color-background: #0b0e14;
-    --color-card: #10141c;
-    --color-card-foreground: #c5cbd6;
-    --color-popover: #10141c;
-    --color-popover-foreground: #c5cbd6;
-    --color-primary: #d4a843;
-    --color-primary-foreground: #0b0e14;
-    --color-secondary: #161b25;
-    --color-secondary-foreground: #c5cbd6;
-    --color-muted-foreground: #565e70;
-    --color-accent-foreground: #e8ecf2;
-    --color-destructive: #ef4444;
-    --color-input: #1e2433;
-    --color-ring: #d4a843;
+    --color-background: #0e1118;
+    --color-card: #141720;
+    --color-card-foreground: #d1d5db;
+    --color-popover: #141720;
+    --color-popover-foreground: #d1d5db;
+    --color-primary: #e2b340;
+    --color-primary-foreground: #0e1118;
+    --color-secondary: #1c1f2b;
+    --color-secondary-foreground: #d1d5db;
+    --color-muted-foreground: #6b7280;
+    --color-accent-foreground: #f1f5f9;
+    --color-destructive: #ea3943;
+    --color-input: #262a36;
+    --color-ring: #e2b340;
 
-    --color-green-soft: #22c55e12;
-    --color-green-soft-border: #22c55e30;
-    --color-red-soft: #ef444412;
-    --color-red-soft-border: #ef444430;
+    --color-green-soft: #16c78415;
+    --color-green-soft-border: #16c78440;
+    --color-red-soft: #ea394315;
+    --color-red-soft-border: #ea394340;
 
-    --radius: 0.625rem;
+    --radius: 0.5rem;
 }
 
 @layer base {
@@ -53,19 +53,23 @@
     background: var(--color-surface);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    font-size: 14px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   ::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
+    width: 6px;
+    height: 6px;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
     background: var(--color-border);
-    border-radius: 2px;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-muted);
   }
 }

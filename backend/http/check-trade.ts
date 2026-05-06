@@ -1,4 +1,5 @@
 import { prisma } from "@exness/db";
+import { publisher } from "@exness/shared";
 
 export async function checkTrade(trade: any, buyPrice: number, sellPrice:number ) {
 const exitPrice = trade.type === "BUY" ? sellPrice : buyPrice;
@@ -38,6 +39,7 @@ const exitPrice = trade.type === "BUY" ? sellPrice : buyPrice;
 
 // @ts-ignore
 async function closeTrade(trade, exitPrice, pnl, status) {
+    const pnlBigInt = BigInt(Math.round(pnl));
     await prisma.$transaction(async (tx) => {
 
         await tx.trade.update({
@@ -45,17 +47,23 @@ async function closeTrade(trade, exitPrice, pnl, status) {
         data: {
             status:     status,        
             closePrice: exitPrice,
-            pnl:        Math.round(pnl),
+            pnl:        pnlBigInt,
             closedAt:   new Date()
         }
         });
 
         await tx.user.update({
-        where: { id: trade.userId },
-        data: {
-            usdBalance: { increment: trade.margin + Math.round(pnl) }
-        }
+            where: { id: trade.userId },
+            data: {
+                usdBalance: { increment: trade.margin + pnlBigInt }
+            }
         });
 
     });
+
+    const executedTrade = {
+        closePrice : exitPrice,
+        pnl: pnl
+    }
+    publisher.publish(`${trade.userId}@trades`,JSON.stringify(executedTrade));
 }

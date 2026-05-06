@@ -67,17 +67,17 @@ export default function TradingPanel({
     setLoading(type);
     try {
       const marginCents = Math.round(parseFloat(volume) * 100);
-      
+
       const tpValue = takeProfit ? Math.round(parseFloat(takeProfit) * scale) : undefined;
       const slValue = stopLoss ? Math.round(parseFloat(stopLoss) * scale) : undefined;
 
       await api.openTrade(symbol, type, marginCents, leverage, tpValue, slValue);
       await fetchBalance();
       onTradeExecuted();
-      
+
       setTakeProfit("");
       setStopLoss("");
-      
+
       toast.success(`${type} order placed`, {
         description: `${displayName} — $${formatNumber(parseFloat(volume), 2)} margin at ${leverage}x leverage`,
       });
@@ -107,21 +107,21 @@ export default function TradingPanel({
       <div className="px-4 py-3 border-b border-border relative" ref={dropdownRef}>
         <button
           onClick={() => setDropdownOpen((o) => !o)}
-          className="flex items-center gap-2.5 w-full rounded-lg px-2.5 py-2 -mx-2 hover:bg-surface-2 transition-colors"
+          className="flex items-center gap-2.5 w-full rounded-md px-2 py-1.5 -mx-2 hover:bg-surface-2 transition-colors"
         >
           {selectedAsset?.imageUrl ? (
             <img src={selectedAsset.imageUrl} alt={selectedAsset.name} className="w-6 h-6 rounded-full shrink-0" />
           ) : (
             <div className="w-6 h-6 rounded-full bg-surface-2 shrink-0" />
           )}
-          <span className="text-sm font-medium text-white flex-1 text-left">
+          <span className="text-sm font-semibold text-white flex-1 text-left">
             {displayName || "Select market"}
           </span>
           <ChevronDown className={`size-4 text-muted transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
         </button>
 
         {dropdownOpen && (
-          <div className="absolute left-2 right-2 top-full z-50 bg-surface-2 border border-border rounded-lg shadow-2xl max-h-64 overflow-y-auto">
+          <div className="absolute left-2 right-2 top-full z-50 bg-surface-2 border border-border rounded-md shadow-2xl max-h-64 overflow-y-auto">
             {assets.map((asset) => {
               const isSelected = asset.symbol === symbol;
               const price = prices[asset.symbol];
@@ -135,7 +135,7 @@ export default function TradingPanel({
                   key={asset.symbol}
                   onClick={() => navigateToAsset(asset.symbol)}
                   className={`flex items-center gap-2.5 w-full px-3 py-2.5 text-left transition-colors ${
-                    isSelected ? "bg-accent/8" : "hover:bg-surface-1"
+                    isSelected ? "bg-accent/10" : "hover:bg-surface-1"
                   }`}
                 >
                   {asset.imageUrl ? (
@@ -144,15 +144,15 @@ export default function TradingPanel({
                     <div className="w-5 h-5 rounded-full bg-border shrink-0" />
                   )}
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs font-medium text-white">
+                    <div className="text-sm font-medium text-white">
                       {asset.symbol.replace("USDT", "/USDT")}
                     </div>
-                    <div className="text-[10px] text-muted truncate">
+                    <div className="text-xs text-muted truncate">
                       {asset.name}
                     </div>
                   </div>
                   {mid !== null && (
-                    <span className="text-[11px] text-muted tabular-nums">
+                    <span className="text-xs text-muted tabular-nums">
                       ${formatNumber(mid, asset.decimals)}
                     </span>
                   )}
@@ -163,23 +163,23 @@ export default function TradingPanel({
         )}
       </div>
 
-      {/* Sell / Buy */}
+      {/* Sell / Buy buttons */}
       <div className="flex border-b border-border">
         <Button
           variant="ghost"
           onClick={() => executeTrade("SELL")}
           disabled={loading !== null || !currentPrice}
-          className="flex-1 h-auto py-3.5 px-4 rounded-none hover:bg-red/5 border-r border-border disabled:opacity-30"
+          className="flex-1 h-auto py-4 px-4 rounded-none hover:bg-red/5 border-r border-border disabled:opacity-30"
         >
           <div className="w-full">
-            <div className="text-[10px] text-muted uppercase tracking-wider mb-0.5">Sell</div>
-            <div className="text-base font-semibold text-red tabular-nums">
+            <div className="text-xs text-muted uppercase tracking-wider mb-1">Sell</div>
+            <div className="text-lg font-semibold text-red tabular-nums">
               {loading === "SELL" ? <Loader2 className="size-4 animate-spin mx-auto" /> : `$${formatPrice(sellPrice)}`}
             </div>
           </div>
         </Button>
-        <div className="flex items-center px-2.5 shrink-0">
-          <Badge variant="outline" className="text-[10px] tabular-nums border-border text-muted px-1.5 h-5">
+        <div className="flex items-center px-3 shrink-0">
+          <Badge variant="outline" className="text-xs tabular-nums border-border text-muted px-2 py-0.5">
             {spread}
           </Badge>
         </div>
@@ -187,11 +187,11 @@ export default function TradingPanel({
           variant="ghost"
           onClick={() => executeTrade("BUY")}
           disabled={loading !== null || !currentPrice}
-          className="flex-1 h-auto py-3.5 px-4 rounded-none hover:bg-green/5 disabled:opacity-30"
+          className="flex-1 h-auto py-4 px-4 rounded-none hover:bg-green/5 disabled:opacity-30"
         >
           <div className="w-full">
-            <div className="text-[10px] text-muted uppercase tracking-wider text-right mb-0.5">Buy</div>
-            <div className="text-base font-semibold text-green tabular-nums text-right">
+            <div className="text-xs text-muted uppercase tracking-wider text-right mb-1">Buy</div>
+            <div className="text-lg font-semibold text-green tabular-nums text-right">
               {loading === "BUY" ? <Loader2 className="size-4 animate-spin ml-auto" /> : `$${formatPrice(buyPrice)}`}
             </div>
           </div>
@@ -199,49 +199,47 @@ export default function TradingPanel({
       </div>
 
       {/* Controls */}
-      <div className="px-4 py-4 space-y-4 flex-1 overflow-y-auto">
+      <div className="px-4 py-5 space-y-5 flex-1 overflow-y-auto">
+        {/* Volume */}
         <div className="space-y-2">
-          <Label className="text-[10px] text-muted uppercase tracking-wider">
-            Volume (USD)
-          </Label>
-          <div className="flex items-center gap-1.5">
+          <Label className="text-xs text-muted">Volume (USD)</Label>
+          <div className="flex items-center gap-2">
             <Button
               variant="outline"
-              size="icon-sm"
+              size="icon"
               onClick={() => adjustVolume(-1)}
               className="bg-surface-2 border-border text-muted hover:text-white hover:bg-surface-2/80"
             >
-              <Minus className="size-3" />
+              <Minus className="size-4" />
             </Button>
             <Input
               type="text"
               value={volume}
               onChange={(e) => setVolume(e.target.value)}
-              className="flex-1 h-7 bg-surface-2 border-border text-center text-white text-xs tabular-nums focus-visible:border-accent focus-visible:ring-accent/20"
+              className="flex-1 h-9 bg-surface-2 border-border text-center text-white tabular-nums"
             />
             <Button
               variant="outline"
-              size="icon-sm"
+              size="icon"
               onClick={() => adjustVolume(1)}
               className="bg-surface-2 border-border text-muted hover:text-white hover:bg-surface-2/80"
             >
-              <Plus className="size-3" />
+              <Plus className="size-4" />
             </Button>
           </div>
         </div>
 
+        {/* Leverage */}
         <div className="space-y-2">
-          <Label className="text-[10px] text-muted uppercase tracking-wider">
-            Leverage
-          </Label>
-          <div className="flex gap-1">
-            {[1, 2, 5, 10, 20, 50].map((lev) => (
+          <Label className="text-xs text-muted">Leverage</Label>
+          <div className="flex gap-1.5">
+            {[1, 5, 10, 20, 100].map((lev) => (
               <Button
                 key={lev}
                 variant={leverage === lev ? "default" : "outline"}
                 size="sm"
                 onClick={() => setLeverage(lev)}
-                className={`flex-1 text-[11px] font-medium ${
+                className={`flex-1 h-9 text-xs font-medium ${
                   leverage === lev
                     ? "bg-accent text-surface hover:bg-accent/90"
                     : "bg-surface-2 border-border text-muted hover:text-white hover:bg-surface-2/80"
@@ -253,36 +251,34 @@ export default function TradingPanel({
           </div>
         </div>
 
+        {/* Take Profit / Stop Loss */}
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-2">
-            <Label className="text-[10px] text-muted uppercase tracking-wider">
-              Take Profit
-            </Label>
+            <Label className="text-xs text-muted">Take Profit</Label>
             <Input
               type="text"
               value={takeProfit}
               onChange={(e) => setTakeProfit(e.target.value)}
               placeholder="None"
-              className="h-7 bg-surface-2 border-border text-white text-xs tabular-nums focus-visible:border-green/50 focus-visible:ring-green/10"
+              className="h-9 bg-surface-2 border-border text-white tabular-nums"
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-[10px] text-muted uppercase tracking-wider">
-              Stop Loss
-            </Label>
+            <Label className="text-xs text-muted">Stop Loss</Label>
             <Input
               type="text"
               value={stopLoss}
               onChange={(e) => setStopLoss(e.target.value)}
               placeholder="None"
-              className="h-7 bg-surface-2 border-border text-white text-xs tabular-nums focus-visible:border-red/50 focus-visible:ring-red/10"
+              className="h-9 bg-surface-2 border-border text-white tabular-nums"
             />
           </div>
         </div>
 
         <Separator className="bg-border" />
 
-        <div className="bg-surface-2 rounded-lg p-3.5 text-xs space-y-2">
+        {/* Summary */}
+        <div className="bg-surface-2 rounded-md p-4 space-y-3 text-sm">
           <div className="flex justify-between">
             <span className="text-muted">Margin</span>
             <span className="text-white tabular-nums font-medium">

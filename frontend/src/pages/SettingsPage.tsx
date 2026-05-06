@@ -44,7 +44,7 @@ export default function SettingsPage() {
   return (
     <div className="max-w-2xl mx-auto py-10 px-6 h-full overflow-y-auto">
       <div className="mb-8">
-        <h1 className="text-xl font-medium text-white mb-1">Account Settings</h1>
+        <h1 className="text-2xl font-semibold text-white mb-1.5">Account Settings</h1>
         <p className="text-sm text-muted">
           Manage your profile information and account preferences.
         </p>
@@ -52,7 +52,7 @@ export default function SettingsPage() {
 
       <Card className="bg-surface-1 border-border ring-0">
         <CardHeader>
-          <CardTitle className="text-white">Profile</CardTitle>
+          <CardTitle className="text-white text-lg">Profile</CardTitle>
           <CardDescription className="text-muted">
             Update your personal details below.
           </CardDescription>
@@ -61,7 +61,7 @@ export default function SettingsPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="first-name" className="text-[11px] text-muted uppercase tracking-wider">
+                <Label htmlFor="first-name" className="text-xs text-muted">
                   First Name
                 </Label>
                 <Input
@@ -69,12 +69,12 @@ export default function SettingsPage() {
                   type="text"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="bg-surface border-border text-white placeholder:text-muted/40 focus-visible:border-accent focus-visible:ring-accent/20"
+                  className="h-10 bg-surface border-border text-white placeholder:text-muted/50"
                   placeholder="Enter first name"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="last-name" className="text-[11px] text-muted uppercase tracking-wider">
+                <Label htmlFor="last-name" className="text-xs text-muted">
                   Last Name
                 </Label>
                 <Input
@@ -82,14 +82,14 @@ export default function SettingsPage() {
                   type="text"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="bg-surface border-border text-white placeholder:text-muted/40 focus-visible:border-accent focus-visible:ring-accent/20"
+                  className="h-10 bg-surface border-border text-white placeholder:text-muted/50"
                   placeholder="Enter last name"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="username" className="text-[11px] text-muted uppercase tracking-wider">
+              <Label htmlFor="username" className="text-xs text-muted">
                 Username
               </Label>
               <Input
@@ -97,13 +97,13 @@ export default function SettingsPage() {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="bg-surface border-border text-white placeholder:text-muted/40 focus-visible:border-accent focus-visible:ring-accent/20"
+                className="h-10 bg-surface border-border text-white placeholder:text-muted/50"
                 placeholder="Enter username"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email-display" className="text-[11px] text-muted uppercase tracking-wider">
+              <Label htmlFor="email-display" className="text-xs text-muted">
                 Email Address
               </Label>
               <Input
@@ -111,9 +111,9 @@ export default function SettingsPage() {
                 type="email"
                 value={user?.email || ""}
                 disabled
-                className="bg-surface border-border text-muted cursor-not-allowed"
+                className="h-10 bg-surface border-border text-muted cursor-not-allowed"
               />
-              <p className="text-[10px] text-muted/60 italic">
+              <p className="text-xs text-muted/60">
                 Email cannot be changed for security reasons.
               </p>
             </div>
@@ -124,11 +124,11 @@ export default function SettingsPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="px-6 bg-accent text-surface font-medium hover:bg-accent/90 disabled:opacity-40"
+                className="h-10 px-6 bg-accent text-surface font-semibold hover:bg-accent/90 disabled:opacity-40"
               >
                 {loading ? (
                   <>
-                    <Loader2 className="size-4 animate-spin mr-1.5" />
+                    <Loader2 className="size-4 animate-spin mr-2" />
                     Saving...
                   </>
                 ) : (
@@ -144,8 +144,8 @@ export default function SettingsPage() {
 
       <Card className="bg-surface-1 border-border ring-0 opacity-40">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <Shield className="size-4" />
+          <CardTitle className="text-white text-lg flex items-center gap-2">
+            <Shield className="size-5" />
             Security
           </CardTitle>
           <CardDescription className="text-muted">
@@ -156,9 +156,9 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-medium text-white mb-1">Two-Factor Authentication</h3>
-              <p className="text-xs text-muted">Add an extra layer of security to your account.</p>
+              <p className="text-sm text-muted">Add an extra layer of security to your account.</p>
             </div>
-            <Button variant="outline" disabled className="text-xs border-border text-muted">
+            <Button variant="outline" disabled className="h-10 text-sm border-border text-muted">
               Enable 2FA
             </Button>
           </div>

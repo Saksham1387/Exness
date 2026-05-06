@@ -10,6 +10,8 @@ export const prisma = new PrismaClient({
   adapter,
 });
 
+const assets = await prisma.asset.findMany({ select: { id: true, symbol: true } });
+const assetMap = new Map(assets.map(a => [a.symbol, a.id]));
 
 export async function cleanupOldCandles() {
   const oneDayAgo = BigInt(Date.now() - 24 * 60 * 60 * 1000);
@@ -33,11 +35,8 @@ export async function cleanupOldCandles() {
 
 export async function processDBBatch(){
   const [items] = await publisher.multi().lRange("db",0,-1).del("db").exec();
-  
-  const assets = await prisma.asset.findMany({ select: { id: true, symbol: true } });
-  const assetMap = new Map(assets.map(a => [a.symbol, a.id]));
-
   const updates = items as string[];
+  
   if (!updates || updates.length === 0) return;
   const parsedUpdates = updates.map(u => JSON.parse(u));
 

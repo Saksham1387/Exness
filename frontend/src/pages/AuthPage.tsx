@@ -39,13 +39,13 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface flex items-center justify-center p-4">
+    <div className="min-h-screen bg-surface flex items-center justify-center p-6">
       <div className="w-full max-w-sm">
         <div className="text-center mb-10">
-          <h1 className="text-base font-semibold tracking-widest uppercase text-accent">
+          <h1 className="text-xl font-bold tracking-wide text-accent">
             Exness
           </h1>
-          <p className="text-muted mt-1.5 text-sm">
+          <p className="text-muted mt-2 text-sm">
             Trading Terminal
           </p>
         </div>
@@ -55,19 +55,19 @@ export default function AuthPage() {
             <CardTitle className="sr-only">Authentication</CardTitle>
             <CardDescription className="sr-only">Sign in or create an account</CardDescription>
             <Tabs value={mode} onValueChange={(v) => setMode(v as "signin" | "signup")} className="w-full">
-              <TabsList className="w-full bg-surface rounded-lg">
-                <TabsTrigger value="signin" className="flex-1 text-xs data-[state=active]:bg-surface-2 data-[state=active]:text-white">
+              <TabsList className="w-full bg-surface rounded-md h-10">
+                <TabsTrigger value="signin" className="flex-1 text-sm data-[state=active]:bg-surface-2 data-[state=active]:text-white">
                   Sign In
                 </TabsTrigger>
-                <TabsTrigger value="signup" className="flex-1 text-xs data-[state=active]:bg-surface-2 data-[state=active]:text-white">
+                <TabsTrigger value="signup" className="flex-1 text-sm data-[state=active]:bg-surface-2 data-[state=active]:text-white">
                   Sign Up
                 </TabsTrigger>
               </TabsList>
 
               <TabsContent value="signin">
-                <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+                <form onSubmit={handleSubmit} className="space-y-5 pt-5">
                   <div className="space-y-2">
-                    <Label htmlFor="email-in" className="text-[10px] text-muted uppercase tracking-wider">
+                    <Label htmlFor="email-in" className="text-xs text-muted">
                       Email
                     </Label>
                     <Input
@@ -75,13 +75,13 @@ export default function AuthPage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="bg-surface border-border text-white placeholder:text-muted/40 focus-visible:border-accent focus-visible:ring-accent/20"
+                      className="h-10 bg-surface border-border text-white placeholder:text-muted/50"
                       placeholder="you@example.com"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="pass-in" className="text-[10px] text-muted uppercase tracking-wider">
+                    <Label htmlFor="pass-in" className="text-xs text-muted">
                       Password
                     </Label>
                     <Input
@@ -89,7 +89,7 @@ export default function AuthPage() {
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="bg-surface border-border text-white placeholder:text-muted/40 focus-visible:border-accent focus-visible:ring-accent/20"
+                      className="h-10 bg-surface border-border text-white placeholder:text-muted/50"
                       placeholder="Min 8 characters"
                       required
                       minLength={8}
@@ -98,7 +98,7 @@ export default function AuthPage() {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-accent text-surface font-medium hover:bg-accent/90 disabled:opacity-40"
+                    className="w-full h-10 bg-accent text-surface font-semibold hover:bg-accent/90 disabled:opacity-40"
                   >
                     {loading ? <Loader2 className="size-4 animate-spin" /> : "Sign In"}
                   </Button>
@@ -106,9 +106,9 @@ export default function AuthPage() {
               </TabsContent>
 
               <TabsContent value="signup">
-                <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+                <form onSubmit={handleSubmit} className="space-y-5 pt-5">
                   <div className="space-y-2">
-                    <Label htmlFor="email-up" className="text-[10px] text-muted uppercase tracking-wider">
+                    <Label htmlFor="email-up" className="text-xs text-muted">
                       Email
                     </Label>
                     <Input
@@ -116,13 +116,13 @@ export default function AuthPage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="bg-surface border-border text-white placeholder:text-muted/40 focus-visible:border-accent focus-visible:ring-accent/20"
+                      className="h-10 bg-surface border-border text-white placeholder:text-muted/50"
                       placeholder="you@example.com"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="pass-up" className="text-[10px] text-muted uppercase tracking-wider">
+                    <Label htmlFor="pass-up" className="text-xs text-muted">
                       Password
                     </Label>
                     <Input
@@ -130,7 +130,7 @@ export default function AuthPage() {
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="bg-surface border-border text-white placeholder:text-muted/40 focus-visible:border-accent focus-visible:ring-accent/20"
+                      className="h-10 bg-surface border-border text-white placeholder:text-muted/50"
                       placeholder="Min 8 characters"
                       required
                       minLength={8}
@@ -139,7 +139,7 @@ export default function AuthPage() {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-accent text-surface font-medium hover:bg-accent/90 disabled:opacity-40"
+                    className="w-full h-10 bg-accent text-surface font-semibold hover:bg-accent/90 disabled:opacity-40"
                   >
                     {loading ? <Loader2 className="size-4 animate-spin" /> : "Create Account"}
                   </Button>

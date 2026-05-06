@@ -36,26 +36,26 @@ export default function TradingPage() {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Sub-header */}
-      <div className="flex items-center gap-3 h-10 px-5 border-b border-border bg-surface-1 shrink-0">
+      <div className="flex items-center gap-4 h-11 px-5 border-b border-border bg-surface-1 shrink-0">
         <Link
           to="/"
-          className="text-xs text-muted hover:text-white transition-colors flex items-center gap-1"
+          className="text-sm text-muted hover:text-white transition-colors flex items-center gap-1"
         >
-          <ChevronLeft className="size-3.5" />
+          <ChevronLeft className="size-4" />
           Markets
         </Link>
-        <span className="text-border">/</span>
-        <div className="flex items-center gap-2">
+        <div className="h-4 w-px bg-border" />
+        <div className="flex items-center gap-2.5">
           {selectedAsset?.imageUrl ? (
-            <img src={selectedAsset.imageUrl} alt={selectedAsset.name} className="w-4 h-4 rounded-full shrink-0" />
+            <img src={selectedAsset.imageUrl} alt={selectedAsset.name} className="w-5 h-5 rounded-full shrink-0" />
           ) : (
-            <div className="w-4 h-4 rounded-full bg-surface-2 shrink-0" />
+            <div className="w-5 h-5 rounded-full bg-surface-2 shrink-0" />
           )}
-          <span className="text-xs font-medium text-white">{displayName}</span>
+          <span className="text-sm font-semibold text-white">{displayName}</span>
         </div>
         {midPrice !== null && (
-          <span className="text-xs text-muted tabular-nums ml-1">
-            {formatNumber(midPrice, decimals)}
+          <span className="text-sm text-muted tabular-nums ml-1">
+            ${formatNumber(midPrice, decimals)}
           </span>
         )}
       </div>
@@ -66,12 +66,12 @@ export default function TradingPage() {
           <div className="flex-1 min-h-0">
             <Chart symbol={symbol} decimals={decimals} />
           </div>
-          <div className="h-[220px] shrink-0">
+          <div className="h-[240px] shrink-0">
             <Positions refreshKey={refreshKey} assets={assets} />
           </div>
         </div>
 
-        <div className="w-[340px] shrink-0">
+        <div className="w-[320px] shrink-0">
           <TradingPanel
             assets={assets}
             selectedAsset={selectedAsset}

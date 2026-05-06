@@ -33,6 +33,20 @@ export const useTradingStore = create<TradingState>((set, get) => ({
     ws.onopen = () => {
       set({ connected: true });
       const channels = Array.from(get().subscribedChannels);
+      
+      // Automatically subscribe to user-specific trade channel if user is logged in
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          const tradeChannel = `${user.id}@trades`;
+          if (!get().subscribedChannels.has(tradeChannel)) {
+             channels.push(tradeChannel);
+             get().subscribedChannels.add(tradeChannel);
+          }
+        } catch (e) {}
+      }
+
       if (channels.length > 0) {
         ws.send(JSON.stringify({ method: "SUBSCRIBE", params: channels }));
       }
@@ -40,10 +54,23 @@ export const useTradingStore = create<TradingState>((set, get) => ({
 
     ws.onmessage = (event) => {
       try {
-        const update = JSON.parse(event.data) as PriceUpdate;
-        set((s) => ({
-          prices: { ...s.prices, [update.symbol]: update },
-        }));
+        const data = JSON.parse(event.data);
+        
+        // Handle Price Updates (ticker)
+        if (data.symbol && (data.buyPrice || data.sellPrice)) {
+          const update = data as PriceUpdate;
+          set((s) => ({
+            prices: { ...s.prices, [update.symbol]: update },
+          }));
+          return;
+        }
+
+        // Handle Trade Notifications (SL/TP hits)
+        if (data.closePrice !== undefined && data.pnl !== undefined) {
+           // This is a trade notification
+           window.dispatchEvent(new CustomEvent("trade-notification", { detail: data }));
+           return;
+        }
       } catch {
         /* ignore malformed messages */
       }

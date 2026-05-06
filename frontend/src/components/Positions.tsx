@@ -46,7 +46,7 @@ function PnlCell({ trade }: { trade: TradeOpen }) {
 
   return (
     <span className={`tabular-nums font-medium ${isProfit ? "text-green" : "text-red"}`}>
-      {isProfit ? "+$" : "-$"}{formatNumber(Math.abs(pnl), 2)}
+      {isProfit ? "+$" : "-$"}{formatNumber(Math.abs(pnl), 6)}
     </span>
   );
 }
@@ -76,7 +76,7 @@ function AssetIcon({
   symbol,
   imageUrl,
   assets,
-  size = 16,
+  size = 18,
 }: {
   symbol?: string;
   imageUrl?: string | null;
@@ -154,6 +154,33 @@ export default function Positions({
     };
   }, [openTrades.length]);
 
+  useEffect(() => {
+    const handleTradeNotification = (event: any) => {
+      const data = event.detail;
+      const pnl = data.pnl / MARGIN_SCALE;
+      const isProfit = pnl >= 0;
+
+      // Refresh data
+      loadOpen();
+      loadClosed();
+      fetchBalance();
+
+      // Show toast
+      if (isProfit) {
+        toast.success("Position closed (Target hit)", {
+          description: `Profit: +$${formatNumber(pnl, 6)}`,
+        });
+      } else {
+        toast.error("Position closed (Stop hit)", {
+          description: `Loss: -$${formatNumber(Math.abs(pnl), 6)}`,
+        });
+      }
+    };
+
+    window.addEventListener("trade-notification", handleTradeNotification);
+    return () => window.removeEventListener("trade-notification", handleTradeNotification);
+  }, [loadOpen, loadClosed, fetchBalance]);
+
   const handleClose = async (orderId: string) => {
     setClosingId(orderId);
     try {
@@ -180,31 +207,31 @@ export default function Positions({
 
   return (
     <Tabs value={tab} onValueChange={setTab} className="flex flex-col h-full bg-surface-1 border-t border-border gap-0">
-      <TabsList variant="line" className="px-4 shrink-0 border-b border-border h-9 rounded-none bg-transparent">
-        <TabsTrigger value="open" className="text-[11px] font-medium h-full rounded-none px-3 text-muted data-[state=active]:text-white">
+      <TabsList variant="line" className="px-5 shrink-0 border-b border-border h-10 rounded-none bg-transparent">
+        <TabsTrigger value="open" className="text-sm font-medium h-full rounded-none px-4 text-muted data-[state=active]:text-white">
           Positions ({openTrades.length})
         </TabsTrigger>
-        <TabsTrigger value="closed" className="text-[11px] font-medium h-full rounded-none px-3 text-muted data-[state=active]:text-white">
+        <TabsTrigger value="closed" className="text-sm font-medium h-full rounded-none px-4 text-muted data-[state=active]:text-white">
           History ({closedTrades.length})
         </TabsTrigger>
       </TabsList>
 
       <TabsContent value="open" className="flex-1 overflow-auto m-0">
         {openTrades.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-muted text-xs">
+          <div className="flex items-center justify-center h-full text-muted text-sm">
             No open positions
           </div>
         ) : (
-          <Table className="text-[11px]">
+          <Table>
             <TableHeader>
               <TableRow className="border-border hover:bg-transparent">
-                <TableHead className="h-8 px-4 text-[10px] font-normal text-muted uppercase tracking-wider">Symbol</TableHead>
-                <TableHead className="h-8 px-4 text-[10px] font-normal text-muted uppercase tracking-wider">Side</TableHead>
-                <TableHead className="h-8 px-3 text-[10px] font-normal text-muted uppercase tracking-wider text-right">Lots</TableHead>
-                <TableHead className="h-8 px-3 text-[10px] font-normal text-muted uppercase tracking-wider text-right">Open</TableHead>
-                <TableHead className="h-8 px-3 text-[10px] font-normal text-muted uppercase tracking-wider text-right">Current</TableHead>
-                <TableHead className="h-8 px-3 text-[10px] font-normal text-muted uppercase tracking-wider text-right">P&L</TableHead>
-                <TableHead className="h-8 px-3 w-8" />
+                <TableHead className="h-10 px-5 text-xs font-normal text-muted">Symbol</TableHead>
+                <TableHead className="h-10 px-4 text-xs font-normal text-muted">Side</TableHead>
+                <TableHead className="h-10 px-4 text-xs font-normal text-muted text-right">Size</TableHead>
+                <TableHead className="h-10 px-4 text-xs font-normal text-muted text-right">Open Price</TableHead>
+                <TableHead className="h-10 px-4 text-xs font-normal text-muted text-right">Current</TableHead>
+                <TableHead className="h-10 px-4 text-xs font-normal text-muted text-right">P&L</TableHead>
+                <TableHead className="h-10 px-3 w-10" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -212,40 +239,40 @@ export default function Positions({
                 const d = trade.decimals ?? 4;
                 const s = Math.pow(10, d);
                 return (
-                  <TableRow key={trade.orderId} className="border-border hover:bg-surface-2/30">
-                    <TableCell className="px-4 py-2">
-                      <div className="flex items-center gap-2">
-                        <AssetIcon symbol={trade.symbol} imageUrl={trade.imageUrl} assets={assets} size={16} />
-                        <span className="text-white font-medium">
+                  <TableRow key={trade.orderId} className="border-border hover:bg-surface-2/40">
+                    <TableCell className="px-5 py-2.5">
+                      <div className="flex items-center gap-2.5">
+                        <AssetIcon symbol={trade.symbol} imageUrl={trade.imageUrl} assets={assets} size={18} />
+                        <span className="text-sm text-white font-medium">
                           {formatPair(trade.symbol)}
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="px-4 py-2">
+                    <TableCell className="px-4 py-2.5">
                       <Badge
                         variant="outline"
-                        className={`text-[10px] px-1.5 h-5 border-transparent ${
+                        className={`text-xs px-2 py-0.5 border-transparent ${
                           trade.type === "buy"
                             ? "bg-green/10 text-green"
                             : "bg-red/10 text-red"
                         }`}
                       >
-                        {trade.type === "buy" ? "Buy" : "Sell"}
+                        {trade.type === "buy" ? "Long" : "Short"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="px-3 py-2 text-right tabular-nums text-white">
+                    <TableCell className="px-4 py-2.5 text-right tabular-nums text-sm text-white">
                       {formatNumber((trade.exposure / MARGIN_SCALE) / (trade.openPrice / s), 4)}
                     </TableCell>
-                    <TableCell className="px-3 py-2 text-right tabular-nums text-white">
+                    <TableCell className="px-4 py-2.5 text-right tabular-nums text-sm text-white">
                       ${formatNumber(trade.openPrice / s, d)}
                     </TableCell>
-                    <TableCell className="px-3 py-2 text-right">
+                    <TableCell className="px-4 py-2.5 text-right text-sm">
                       $<CurrentPriceCell trade={trade} />
                     </TableCell>
-                    <TableCell className="px-3 py-2 text-right">
+                    <TableCell className="px-4 py-2.5 text-right text-sm">
                       <PnlCell trade={trade} />
                     </TableCell>
-                    <TableCell className="px-3 py-2 text-right">
+                    <TableCell className="px-3 py-2.5 text-right">
                       <Button
                         variant="ghost"
                         size="icon-xs"
@@ -254,9 +281,9 @@ export default function Positions({
                         className="text-muted hover:text-red hover:bg-red/10 disabled:opacity-30"
                       >
                         {closingId === trade.orderId ? (
-                          <Loader2 className="size-3 animate-spin" />
+                          <Loader2 className="size-3.5 animate-spin" />
                         ) : (
-                          <X className="size-3" />
+                          <X className="size-3.5" />
                         )}
                       </Button>
                     </TableCell>
@@ -270,19 +297,19 @@ export default function Positions({
 
       <TabsContent value="closed" className="flex-1 overflow-auto m-0">
         {closedTrades.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-muted text-xs">
+          <div className="flex items-center justify-center h-full text-muted text-sm">
             No trade history
           </div>
         ) : (
-          <Table className="text-[11px]">
+          <Table>
             <TableHeader>
               <TableRow className="border-border hover:bg-transparent">
-                <TableHead className="h-8 px-4 text-[10px] font-normal text-muted uppercase tracking-wider">Symbol</TableHead>
-                <TableHead className="h-8 px-4 text-[10px] font-normal text-muted uppercase tracking-wider">Side</TableHead>
-                <TableHead className="h-8 px-3 text-[10px] font-normal text-muted uppercase tracking-wider text-right">Lots</TableHead>
-                <TableHead className="h-8 px-3 text-[10px] font-normal text-muted uppercase tracking-wider text-right">Open</TableHead>
-                <TableHead className="h-8 px-3 text-[10px] font-normal text-muted uppercase tracking-wider text-right">Close</TableHead>
-                <TableHead className="h-8 px-3 text-[10px] font-normal text-muted uppercase tracking-wider text-right">P&L</TableHead>
+                <TableHead className="h-10 px-5 text-xs font-normal text-muted">Symbol</TableHead>
+                <TableHead className="h-10 px-4 text-xs font-normal text-muted">Side</TableHead>
+                <TableHead className="h-10 px-4 text-xs font-normal text-muted text-right">Size</TableHead>
+                <TableHead className="h-10 px-4 text-xs font-normal text-muted text-right">Open</TableHead>
+                <TableHead className="h-10 px-4 text-xs font-normal text-muted text-right">Close</TableHead>
+                <TableHead className="h-10 px-4 text-xs font-normal text-muted text-right">P&L</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -292,42 +319,43 @@ export default function Positions({
                 const pnl = trade.pnl / MARGIN_SCALE;
                 const isProfit = pnl >= 0;
                 return (
-                  <TableRow key={trade.orderId} className="border-border hover:bg-surface-2/30">
-                    <TableCell className="px-4 py-2">
-                      <div className="flex items-center gap-2">
-                        <AssetIcon symbol={trade.symbol} imageUrl={trade.imageUrl} assets={assets} size={16} />
-                        <span className="text-white font-medium">
+                  <TableRow key={trade.orderId} className="border-border hover:bg-surface-2/40">
+                    <TableCell className="px-5 py-2.5">
+                      <div className="flex items-center gap-2.5">
+                        <AssetIcon symbol={trade.symbol} imageUrl={trade.imageUrl} assets={assets} size={18} />
+                        <span className="text-sm text-white font-medium">
                           {formatPair(trade.symbol)}
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="px-4 py-2">
+                    <TableCell className="px-4 py-2.5">
                       <Badge
                         variant="outline"
-                        className={`text-[10px] px-1.5 h-5 border-transparent ${
+                        className={`text-xs px-2 py-0.5 border-transparent ${
                           trade.type === "buy"
                             ? "bg-green/10 text-green"
                             : "bg-red/10 text-red"
                         }`}
                       >
-                        {trade.type === "buy" ? "Buy" : "Sell"}
+                        {trade.type === "buy" ? "Long" : "Short"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="px-3 py-2 text-right tabular-nums text-white">
+                    <TableCell className="px-4 py-2.5 text-right tabular-nums text-sm text-white">
                       {formatNumber((trade.margin / MARGIN_SCALE * trade.leverage) / (trade.openPrice / s), 4)}
                     </TableCell>
-                    <TableCell className="px-3 py-2 text-right tabular-nums text-white">
+                    <TableCell className="px-4 py-2.5 text-right tabular-nums text-sm text-white">
                       ${formatNumber(trade.openPrice / s, d)}
                     </TableCell>
-                    <TableCell className="px-3 py-2 text-right tabular-nums text-white">
+                    <TableCell className="px-4 py-2.5 text-right tabular-nums text-sm text-white">
                       ${formatNumber(trade.closePrice / s, d)}
                     </TableCell>
                     <TableCell className="px-3 py-2 text-right">
                       <span className={`tabular-nums font-medium ${isProfit ? "text-green" : "text-red"}`}>
-                        {isProfit ? "+$" : "-$"}{formatNumber(Math.abs(pnl), 2)}
+                        {isProfit ? "+$" : "-$"}{formatNumber(Math.abs(pnl), 6)}
                       </span>
                     </TableCell>
-                  </TableRow>
+                    </TableRow>
+
                 );
               })}
             </TableBody>
