@@ -13,6 +13,11 @@ export async function checkTrade(trade: TradeModel, buyPrice: bigint, sellPrice:
         : trade.openPrice - exitPrice;
     const pnl = (priceDelta * trade.exposure) / trade.openPrice;
 
+    if (pnl <= -trade.margin) {
+        await closeTrade(trade, exitPrice, -trade.margin, "LIQUIDATED");
+        return;
+    }
+
     if (trade.stopLoss !== null) {
         const stopHit = trade.type === "BUY"
             ? exitPrice <= trade.stopLoss

@@ -1,15 +1,15 @@
-import express, { type Request, type Response, type NextFunction } from "express";
+import { type Request, type Response, type NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from ".";
 
 export interface AuthPayload {
-    userId: string;
-    email: string;
-  }
+  userId: string;
+  email: string;
+}
   
-  export interface AuthRequest extends Request {
-    user?: AuthPayload;
-  }
+export interface AuthRequest extends Request {
+  user?: AuthPayload;
+}
 
 export function authMiddleware(
     req: AuthRequest,

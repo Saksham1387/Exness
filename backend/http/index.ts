@@ -13,6 +13,7 @@ const app = express();
 app.set("json replacer", (_key: string, value: unknown) =>
   typeof value === "bigint" ? value.toString() : value
 );
+
 app.use(express.json());
 app.use(cors());
 
@@ -24,7 +25,6 @@ const latestPrices = new Map<string, PriceUpdate>();
 const assets = await prisma.asset.findMany({ select: { symbol: true } });
 const channels = assets.map((a) => `${a.symbol}@prices`);
 
-// This is very bad, should store this in-memory
 await subscriber.subscribe(channels, async (message) => {
   const update = JSON.parse(message) as PriceUpdate;
 
@@ -305,6 +305,7 @@ app.get("/api/v1/trades", authMiddleware, async (req: AuthRequest, res: Response
       type: true,
       margin: true,
       leverage: true,
+      exposure: true,
       openPrice: true,
       closePrice: true,
       pnl: true,
@@ -322,6 +323,7 @@ app.get("/api/v1/trades", authMiddleware, async (req: AuthRequest, res: Response
       type: t.type.toLowerCase(),
       margin: Number(t.margin),
       leverage: Number(t.leverage),
+      exposure: Number(t.exposure),
       openPrice: Number(t.openPrice),
       closePrice: Number(t.closePrice),
       pnl: Number(t.pnl),

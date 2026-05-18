@@ -77,19 +77,7 @@ export default function AppLayout() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Badge
-            variant="outline"
-            className={`text-xs gap-1.5 border-border px-2.5 py-1 ${
-              connected ? "text-green" : "text-red"
-            }`}
-          >
-            <span className={`w-2 h-2 rounded-full ${connected ? "bg-green" : "bg-red"}`} />
-            {connected ? "Live" : "Offline"}
-          </Badge>
-
-          <div className="h-5 w-px bg-border" />
-
-          <span className="tabular-nums font-medium text-sm text-white">
+            <span className="tabular-nums font-medium text-sm text-white">
             ${balance.toLocaleString("en-US", {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,

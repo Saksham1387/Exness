@@ -341,7 +341,7 @@ export default function Positions({
                       </Badge>
                     </TableCell>
                     <TableCell className="px-4 py-2.5 text-right tabular-nums text-sm text-white">
-                      {formatNumber((trade.margin / MARGIN_SCALE * trade.leverage) / (trade.openPrice / s), 4)}
+                      {formatNumber((trade.exposure / MARGIN_SCALE) / (trade.openPrice / s), 4)}
                     </TableCell>
                     <TableCell className="px-4 py-2.5 text-right tabular-nums text-sm text-white">
                       ${formatNumber(trade.openPrice / s, d)}

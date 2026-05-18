@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ChevronDown, Minus, Plus, Loader2 } from "lucide-react";
 
@@ -26,7 +25,8 @@ export default function TradingPanel({
   const [leverage, setLeverage] = useState(1);
   const [takeProfit, setTakeProfit] = useState("");
   const [stopLoss, setStopLoss] = useState("");
-  const [loading, setLoading] = useState<"BUY" | "SELL" | null>(null);
+  const [side, setSide] = useState<"BUY" | "SELL">("BUY");
+  const [loading, setLoading] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -62,23 +62,23 @@ export default function TradingPanel({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const executeTrade = async (type: "BUY" | "SELL") => {
+  const executeTrade = async () => {
     if (!symbol) return;
-    setLoading(type);
+    setLoading(true);
     try {
       const marginCents = Math.round(parseFloat(volume) * 100);
 
       const tpValue = takeProfit ? Math.round(parseFloat(takeProfit) * scale) : undefined;
       const slValue = stopLoss ? Math.round(parseFloat(stopLoss) * scale) : undefined;
 
-      await api.openTrade(symbol, type, marginCents, leverage, tpValue, slValue);
+      await api.openTrade(symbol, side, marginCents, leverage, tpValue, slValue);
       await fetchBalance();
       onTradeExecuted();
 
       setTakeProfit("");
       setStopLoss("");
 
-      toast.success(`${type} order placed`, {
+      toast.success(`${side} order placed`, {
         description: `${displayName} — $${formatNumber(parseFloat(volume), 2)} margin at ${leverage}x leverage`,
       });
     } catch (err) {
@@ -86,7 +86,7 @@ export default function TradingPanel({
         description: err instanceof Error ? err.message : "Could not execute trade",
       });
     } finally {
-      setLoading(null);
+      setLoading(false);
     }
   };
 
@@ -163,39 +163,34 @@ export default function TradingPanel({
         )}
       </div>
 
-      {/* Sell / Buy buttons */}
+      {/* Side selector */}
       <div className="flex border-b border-border">
-        <Button
-          variant="ghost"
-          onClick={() => executeTrade("SELL")}
-          disabled={loading !== null || !currentPrice}
-          className="flex-1 h-auto py-4 px-4 rounded-none hover:bg-red/5 border-r border-border disabled:opacity-30"
+        <button
+          onClick={() => setSide("SELL")}
+          className={`flex-1 py-4 px-4 border-r border-border transition-colors ${
+            side === "SELL" ? "bg-red/10" : "hover:bg-red/5"
+          }`}
         >
           <div className="w-full">
-            <div className="text-xs text-muted uppercase tracking-wider mb-1">Sell</div>
-            <div className="text-lg font-semibold text-red tabular-nums">
-              {loading === "SELL" ? <Loader2 className="size-4 animate-spin mx-auto" /> : `$${formatPrice(sellPrice)}`}
+            <div className={`text-xs uppercase tracking-wider mb-1 ${side === "SELL" ? "text-red" : "text-muted"}`}>Sell</div>
+            <div className={`text-lg font-semibold tabular-nums ${side === "SELL" ? "text-red" : "text-muted"}`}>
+              ${formatPrice(sellPrice)}
             </div>
           </div>
-        </Button>
-        <div className="flex items-center px-3 shrink-0">
-          <Badge variant="outline" className="text-xs tabular-nums border-border text-muted px-2 py-0.5">
-            {spread}
-          </Badge>
-        </div>
-        <Button
-          variant="ghost"
-          onClick={() => executeTrade("BUY")}
-          disabled={loading !== null || !currentPrice}
-          className="flex-1 h-auto py-4 px-4 rounded-none hover:bg-green/5 disabled:opacity-30"
+        </button>
+        <button
+          onClick={() => setSide("BUY")}
+          className={`flex-1 py-4 px-4 transition-colors ${
+            side === "BUY" ? "bg-green/10" : "hover:bg-green/5"
+          }`}
         >
           <div className="w-full">
-            <div className="text-xs text-muted uppercase tracking-wider text-right mb-1">Buy</div>
-            <div className="text-lg font-semibold text-green tabular-nums text-right">
-              {loading === "BUY" ? <Loader2 className="size-4 animate-spin ml-auto" /> : `$${formatPrice(buyPrice)}`}
+            <div className={`text-xs uppercase tracking-wider text-right mb-1 ${side === "BUY" ? "text-green" : "text-muted"}`}>Buy</div>
+            <div className={`text-lg font-semibold tabular-nums text-right ${side === "BUY" ? "text-green" : "text-muted"}`}>
+              ${formatPrice(buyPrice)}
             </div>
           </div>
-        </Button>
+        </button>
       </div>
 
       {/* Controls */}
@@ -301,6 +296,23 @@ export default function TradingPanel({
             </span>
           </div>
         </div>
+
+        {/* Execute button */}
+        <Button
+          onClick={executeTrade}
+          disabled={loading || !currentPrice || !symbol}
+          className={`w-full h-11 text-sm font-semibold transition-colors disabled:opacity-40 ${
+            side === "BUY"
+              ? "bg-green hover:bg-green/90 text-surface"
+              : "bg-red hover:bg-red/90 text-white"
+          }`}
+        >
+          {loading ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            `${side === "BUY" ? "Buy" : "Sell"} ${displayName || "—"}`
+          )}
+        </Button>
       </div>
     </div>
   );

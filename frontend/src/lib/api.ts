@@ -43,6 +43,7 @@ export interface TradeHistory {
   type: string;
   margin: number;
   leverage: number;
+  exposure: number;
   openPrice: number;
   closePrice: number;
   pnl: number;
