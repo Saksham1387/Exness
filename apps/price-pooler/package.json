@@ -1,8 +1,12 @@
 {
-  "name": "ws",
+  "name": "@exness/price-pooler",
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "dev": "bun --hot index.ts",
+    "start": "bun index.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
@@ -12,8 +16,6 @@
   "dependencies": {
     "@exness/shared": "workspace:*",
     "@types/ws": "^8.18.1",
-    "express": "^5.2.1",
-    "redis": "^5.12.1",
     "ws": "^8.20.0"
   }
 }

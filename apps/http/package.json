@@ -1,8 +1,12 @@
 {
-  "name": "http",
+  "name": "@exness/http",
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "dev": "bun --hot index.ts",
+    "start": "bun index.ts"
+  },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
     "@types/bun": "latest",
