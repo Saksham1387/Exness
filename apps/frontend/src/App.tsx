@@ -49,16 +49,17 @@ export default function App() {
             }
           />
 
-          <Route
-            element={
-              <ProtectedRoute>
-                <AppLayout />
-              </ProtectedRoute>
-            }
-          >
+          <Route element={<AppLayout />}>
             <Route index element={<MarketsPage />} />
-            <Route path="settings" element={<SettingsPage />} />
             <Route path=":symbol" element={<TradingPage />} />
+            <Route
+              path="settings"
+              element={
+                <ProtectedRoute>
+                  <SettingsPage />
+                </ProtectedRoute>
+              }
+            />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

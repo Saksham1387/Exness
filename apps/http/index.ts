@@ -8,6 +8,7 @@ import { subscriber } from "@exness/shared";
 import type { PriceUpdate } from "@exness/shared";
 import cors from "cors";
 import { checkTrade } from "./check-trade.ts";
+import cookieParser from "cookie-parser";
 
 const app = express();
 app.set("json replacer", (_key: string, value: unknown) =>
@@ -15,30 +16,44 @@ app.set("json replacer", (_key: string, value: unknown) =>
 );
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_ORIGIN ?? "http://localhost:5173",
+  credentials: true,
+}));
+app.use(cookieParser());
 
 export const JWT_SECRET = process.env.JWT_SECRET!;
 const PORT = process.env.PORT ?? 3000;
 
+const COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+const cookieOptions = {
+  httpOnly: true,
+  sameSite: "lax" as const,
+  secure: process.env.NODE_ENV === "production",
+  maxAge: COOKIE_MAX_AGE_MS,
+};
+
 const latestPrices = new Map<string, PriceUpdate>();
 
-const assets = await prisma.asset.findMany({ select: { symbol: true } });
+const assets = await prisma.asset.findMany({ select: { id: true, symbol: true } });
+const assetIdBySymbol = new Map(assets.map((a) => [a.symbol, a.id]));
+
 const channels = assets.map((a) => `${a.symbol}@prices`);
 
 await subscriber.subscribe(channels, async (message) => {
   const update = JSON.parse(message) as PriceUpdate;
-
   latestPrices.set(update.symbol, update);
+
+  const assetId = assetIdBySymbol.get(update.symbol);
+  if (!assetId) {
+    return;
+  }
 
   const openTrades = await prisma.trade.findMany({
     where: {
-      asset: {
-        symbol:{
-          equals:update.symbol
-        }
-      } ,
-      status: "OPEN"
-    }
+      assetId,
+      status: TradeStatus.OPEN,
+    },
   });
 
   // Convert at the boundary: WS payload carries scaled-integer numbers (×10,000).
@@ -82,7 +97,9 @@ app.post("/auth/signup", async (req: Request, res: Response): Promise<void> => {
     { expiresIn: "7d" }
   );
 
-  res.status(201).json({ token, user });
+  res.cookie("jwt", token, cookieOptions);
+
+  res.status(201).json({ user });
 });
 
 app.post("/auth/signin", async (req: Request, res: Response): Promise<void> => {
@@ -111,28 +128,38 @@ app.post("/auth/signin", async (req: Request, res: Response): Promise<void> => {
     { expiresIn: "7d" }
   );
 
+  res.cookie("jwt", token, cookieOptions);
+
   res.json({
-    token,
     user: { id: user.id, email: user.email, usdBalance: Number(user.usdBalance), createdAt: user.createdAt },
   });
 });
 
+app.post("/auth/logout", (_req: Request, res: Response): void => {
+  res.clearCookie("jwt", { ...cookieOptions, maxAge: undefined });
+  res.json({ ok: true });
+});
+
 app.post("/api/v1/trade", authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
-  const { asset, type, margin, leverage, stopLoss, takeProfit } = req.body as {
+  const { asset, type, margin, price, quantity, stopLoss, takeProfit } = req.body as {
     asset?: string;
     type?: string;
     margin?: number;
-    leverage?: number;
-
+    price?: number;
+    quantity?: number;
     stopLoss?: number;
-    takeProfit?: number
+    takeProfit?: number;
   };
 
-  if (!asset || !type || margin == null || leverage == null) {
-    res.status(400).json({ error: "asset, type, margin and leverage are required" });
+  if (!asset || !type || margin == null || price == null || quantity == null) {
+    res.status(400).json({ error: "asset, type, margin, price and quantity are required" });
     return;
   }
 
+  if (margin <= 0 || price <= 0 || quantity <= 0) {
+    res.status(400).json({ error: "margin, price and quantity must be positive" });
+    return;
+  }
 
   const tradeType = type.toUpperCase() as TradeType;
   if (tradeType !== TradeType.BUY && tradeType !== TradeType.SELL) {
@@ -165,9 +192,17 @@ app.post("/api/v1/trade", authMiddleware, async (req: AuthRequest, res: Response
     return;
   }
 
-  // Use buy price for BUY orders, sell price for SELL orders
+  // price arrives scaled by 10^asset.decimals; convert (price * quantity) to cents (×100).
+  const priceScale = Math.pow(10, dbAsset.decimals);
+  const exposure = Math.round((price * quantity * 100) / priceScale);
+  if (exposure < margin) {
+    res.status(400).json({ error: "Exposure must be at least equal to margin" });
+    return;
+  }
+  const leverage = Math.round(exposure / margin);
+
+  // Use buy price for BUY orders, sell price for SELL orders (server-side, not client-supplied)
   const openPrice = tradeType === TradeType.BUY ? priceUpdate.buyPrice : priceUpdate.sellPrice;
-  const exposure = margin * leverage;
 
   const trade = await prisma.trade.create({
     data: {
@@ -345,7 +380,7 @@ app.get("/api/v1/user/balance", authMiddleware, async (req: AuthRequest, res: Re
   res.json({ usd_balance: Number(user.usdBalance) });
 });
 
-app.get("/api/v1/candles", authMiddleware, async (req: Request, res: Response): Promise<void> => {
+app.get("/api/v1/candles", async (req: Request, res: Response): Promise<void> => {
   const { asset, startTime, endTime, ts } = req.query as {
     asset?: string;
     startTime?: string;
@@ -385,7 +420,6 @@ app.get("/api/v1/candles", authMiddleware, async (req: Request, res: Response): 
   });
 });
 
-
 app.get("/api/v1/user", authMiddleware, authMiddleware, async (req: AuthRequest, res: Response) => {
   const user = await prisma.user.findUnique({
     where: { id: req.user!.userId }
@@ -400,7 +434,6 @@ app.get("/api/v1/user", authMiddleware, authMiddleware, async (req: AuthRequest,
     user
   })
 });
-
 
 app.patch("/api/v1/user/setting",authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   const { firstName, lastName, username } = req.body;
@@ -434,7 +467,7 @@ app.patch("/api/v1/user/setting",authMiddleware, async (req: AuthRequest, res: R
   })
 })
 
-app.get("/api/v1/assets", authMiddleware, async (_req: Request, res: Response): Promise<void> => {
+app.get("/api/v1/assets", async (_req: Request, res: Response): Promise<void> => {
   const assets = await prisma.asset.findMany({
     select: { name: true, symbol: true, decimals: true, imageUrl: true },
   });

@@ -4,21 +4,22 @@ async function request<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const token = localStorage.getItem("token");
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...((options.headers as Record<string, string>) ?? {}),
   };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers,
+    credentials: "include",
+  });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error ?? "Request failed");
   return data as T;
 }
 
 export interface AuthResponse {
-  token: string;
   user: { id: string; email: string; usdBalance: number; createdAt: string };
 }
 
@@ -97,6 +98,8 @@ export const api = {
       body: JSON.stringify({ email, password }),
     }),
 
+  logout: () => request<{ ok: true }>("/auth/logout", { method: "POST" }),
+
   getUser: () => request<{ user: UserProfile }>("/api/v1/user"),
 
   updateSettings: (data: {
@@ -122,13 +125,14 @@ export const api = {
     asset: string,
     type: string,
     margin: number,
-    leverage: number,
+    price: number,
+    quantity: number,
     takeProfit?: number,
     stopLoss?: number
   ) =>
     request<{ orderId: string }>("/api/v1/trade", {
       method: "POST",
-      body: JSON.stringify({ asset, type, margin, leverage, takeProfit, stopLoss }),
+      body: JSON.stringify({ asset, type, margin, price, quantity, takeProfit, stopLoss }),
     }),
 
   closeTrade: (orderId: string) =>

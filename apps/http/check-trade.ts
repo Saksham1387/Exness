@@ -1,6 +1,6 @@
 import { prisma } from "@exness/db";
 import type { TradeModel } from "@exness/db/generated/prisma/models";
-import type { TradeStatus } from "@exness/db/generated/prisma/enums";
+import { TradeStatus } from "@exness/db/generated/prisma/enums";
 import { publisher } from "@exness/shared";
 
 export async function checkTrade(trade: TradeModel, buyPrice: bigint, sellPrice: bigint) {
@@ -42,9 +42,12 @@ export async function checkTrade(trade: TradeModel, buyPrice: bigint, sellPrice:
 }
 
 async function closeTrade(trade: TradeModel, exitPrice: bigint, pnl: bigint, status: TradeStatus) {
-    await prisma.$transaction(async (tx) => {
-        await tx.trade.update({
-            where: { id: trade.id },
+    const closed = await prisma.$transaction(async (tx) => {
+        const result = await tx.trade.updateMany({
+            where: {
+                id: trade.id,
+                status: TradeStatus.OPEN,
+            },
             data: {
                 status,
                 closePrice: exitPrice,
@@ -53,13 +56,23 @@ async function closeTrade(trade: TradeModel, exitPrice: bigint, pnl: bigint, sta
             },
         });
 
+        if (result.count === 0) {
+            return false;
+        }
+
         await tx.user.update({
             where: { id: trade.userId },
             data: {
                 usdBalance: { increment: trade.margin + pnl },
             },
         });
+
+        return true;
     });
+
+    if (!closed) {
+        return;
+    }
 
     // BigInt isn't JSON-serializable; values are well within 2^53 so Number() is safe here.
     const executedTrade = {

@@ -37,16 +37,17 @@ export default function TradingPanel({
   const prices = useTradingStore((s) => s.prices);
   const currentPrice = symbol ? (prices[symbol] ?? null) : null;
   const fetchBalance = useAuthStore((s) => s.fetchBalance);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   const sellPrice = currentPrice ? currentPrice.sellPrice / scale : null;
   const buyPrice = currentPrice ? currentPrice.buyPrice / scale : null;
 
   const formatPrice = (p: number | null) =>
-    p !== null ? formatNumber(p, decimals) : "—";
+    p !== null ? formatNumber(p) : "—";
 
   const spread =
     buyPrice && sellPrice
-      ? (buyPrice - sellPrice).toFixed(decimals)
+      ? (buyPrice - sellPrice).toFixed(2)
       : "—";
 
   const displayName = symbol ? symbol.replace("USDT", "/USDT") : "";
@@ -67,11 +68,19 @@ export default function TradingPanel({
     setLoading(true);
     try {
       const marginCents = Math.round(parseFloat(volume) * 100);
+      const refPriceScaled = side === "BUY" ? currentPrice?.buyPrice : currentPrice?.sellPrice;
+      const refPriceUsd = sellPrice !== null && side === "SELL" ? sellPrice : buyPrice;
+      if (refPriceScaled == null || refPriceUsd == null || refPriceUsd <= 0) {
+        toast.error("Price not available yet");
+        setLoading(false);
+        return;
+      }
+      const quantity = (parseFloat(volume) * leverage) / refPriceUsd;
 
       const tpValue = takeProfit ? Math.round(parseFloat(takeProfit) * scale) : undefined;
       const slValue = stopLoss ? Math.round(parseFloat(stopLoss) * scale) : undefined;
 
-      await api.openTrade(symbol, side, marginCents, leverage, tpValue, slValue);
+      await api.openTrade(symbol, side, marginCents, refPriceScaled, quantity, tpValue, slValue);
       await fetchBalance();
       onTradeExecuted();
 
@@ -153,7 +162,7 @@ export default function TradingPanel({
                   </div>
                   {mid !== null && (
                     <span className="text-xs text-muted tabular-nums">
-                      ${formatNumber(mid, asset.decimals)}
+                      ${formatNumber(mid)}
                     </span>
                   )}
                 </button>
@@ -290,7 +299,7 @@ export default function TradingPanel({
             <span className="text-muted">Size</span>
             <span className="text-white tabular-nums font-medium">
               {buyPrice
-                ? formatNumber((parseFloat(volume) * leverage) / buyPrice, 4)
+                ? formatNumber((parseFloat(volume) * leverage) / buyPrice)
                 : "—"}{" "}
               {baseAssetName}
             </span>
@@ -298,21 +307,30 @@ export default function TradingPanel({
         </div>
 
         {/* Execute button */}
-        <Button
-          onClick={executeTrade}
-          disabled={loading || !currentPrice || !symbol}
-          className={`w-full h-11 text-sm font-semibold transition-colors disabled:opacity-40 ${
-            side === "BUY"
-              ? "bg-green hover:bg-green/90 text-surface"
-              : "bg-red hover:bg-red/90 text-white"
-          }`}
-        >
-          {loading ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : (
-            `${side === "BUY" ? "Buy" : "Sell"} ${displayName || "—"}`
-          )}
-        </Button>
+        {isAuthenticated ? (
+          <Button
+            onClick={executeTrade}
+            disabled={loading || !currentPrice || !symbol}
+            className={`w-full h-11 text-sm font-semibold transition-colors disabled:opacity-40 ${
+              side === "BUY"
+                ? "bg-green hover:bg-green/90 text-surface"
+                : "bg-red hover:bg-red/90 text-white"
+            }`}
+          >
+            {loading ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              `${side === "BUY" ? "Buy" : "Sell"} ${displayName || "—"}`
+            )}
+          </Button>
+        ) : (
+          <Button
+            onClick={() => navigate("/auth")}
+            className="w-full h-11 text-sm font-semibold bg-accent text-surface hover:bg-accent/90"
+          >
+            Sign in to trade
+          </Button>
+        )}
       </div>
     </div>
   );

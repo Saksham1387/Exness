@@ -8,7 +8,6 @@ async function pushCandle(symbol: string, candle: Candle) {
         symbol,
         candle
     }
-
     publisher.LPUSH("db",JSON.stringify(newCandle));
 }
 

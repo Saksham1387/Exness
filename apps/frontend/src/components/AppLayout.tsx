@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Settings, LogOut, ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function AppLayout() {
   const connect = useTradingStore((s) => s.connect);
@@ -24,6 +25,7 @@ export default function AppLayout() {
 
   const balance = useAuthStore((s) => s.balance);
   const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const logout = useAuthStore((s) => s.logout);
   const fetchBalance = useAuthStore((s) => s.fetchBalance);
 
@@ -77,16 +79,25 @@ export default function AppLayout() {
         </div>
 
         <div className="flex items-center gap-4">
-            <span className="tabular-nums font-medium text-sm text-white">
-            ${balance.toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
-          </span>
+          {!isAuthenticated ? (
+            <Button
+              onClick={() => navigate("/auth")}
+              className="h-9 px-4 bg-accent text-surface hover:bg-accent/90 text-sm font-semibold"
+            >
+              Login
+            </Button>
+          ) : (
+            <>
+              <span className="tabular-nums font-medium text-sm text-white">
+                ${balance.toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </span>
 
-          <div className="h-5 w-px bg-border" />
+              <div className="h-5 w-px bg-border" />
 
-          <DropdownMenu>
+              <DropdownMenu>
             <DropdownMenuTrigger className="flex items-center gap-2 outline-none group">
               <Avatar className="w-8 h-8 bg-accent">
                 <AvatarFallback className="bg-accent text-surface text-xs font-bold">
@@ -125,6 +136,8 @@ export default function AppLayout() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+            </>
+          )}
         </div>
       </header>
 

@@ -22,8 +22,7 @@ function AssetRow({ asset }: { asset: AssetInfo }) {
   const mid = price ? (price.buyPrice + price.sellPrice) / 2 / scale : null;
   const buy = price ? price.buyPrice / scale : null;
   const sell = price ? price.sellPrice / scale : null;
-  const spread = buy && sell ? ((buy - sell) * scale).toFixed(0) : null;
-
+  
   const slug = asset.symbol.replace("USDT", "_USDT");
   const pair = asset.symbol.replace("USDT", "/USDT");
 
@@ -48,25 +47,19 @@ function AssetRow({ asset }: { asset: AssetInfo }) {
 
       <TableCell className="px-5 py-4 text-right">
         <span className="tabular-nums text-sm text-white font-medium">
-          {mid !== null ? `$${formatNumber(mid, asset.decimals)}` : "—"}
+          {mid !== null ? `$${formatNumber(mid)}` : "—"}
         </span>
       </TableCell>
 
       <TableCell className="px-5 py-4 text-right">
         <span className="tabular-nums text-sm text-red">
-          {sell !== null ? formatNumber(sell, asset.decimals) : "—"}
+          {sell !== null ? formatNumber(sell) : "—"}
         </span>
       </TableCell>
 
       <TableCell className="px-5 py-4 text-right">
         <span className="tabular-nums text-sm text-green">
-          {buy !== null ? formatNumber(buy, asset.decimals) : "—"}
-        </span>
-      </TableCell>
-
-      <TableCell className="px-5 py-4 text-right">
-        <span className="tabular-nums text-sm text-muted">
-          {spread ?? "—"}
+          {buy !== null ? formatNumber(buy) : "—"}
         </span>
       </TableCell>
 
@@ -108,9 +101,8 @@ export default function MarketsPage() {
                   <TableHead className="px-5 py-3.5 text-xs font-medium text-muted">Market</TableHead>
                   <TableHead className="px-5 py-3.5 text-xs font-medium text-muted text-right">Price</TableHead>
                   <TableHead className="px-5 py-3.5 text-xs font-medium text-muted text-right">Bid</TableHead>
-                  <TableHead className="px-5 py-3.5 text-xs font-medium text-muted text-right">Ask</TableHead>
-                  <TableHead className="px-5 py-3.5 text-xs font-medium text-muted text-right">Spread</TableHead>
-                  <TableHead className="px-5 py-3.5" />
+                  <TableHead className="px-5 py-3.5 text-xs font-medium text-muted text-right">Ask</TableHead>                  
+                  
                 </TableRow>
               </TableHeader>
               <TableBody>

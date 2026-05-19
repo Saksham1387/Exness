@@ -3,7 +3,6 @@ import { api } from "@/lib/api";
 import type { UserProfile } from "@/lib/api";
 
 interface AuthState {
-  token: string | null;
   user: UserProfile | null;
   balance: number;
   isAuthenticated: boolean;
@@ -11,31 +10,29 @@ interface AuthState {
 
   signin: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   fetchBalance: () => Promise<void>;
   fetchUser: () => Promise<void>;
   updateUser: (data: Partial<UserProfile>) => void;
   setBalance: (balance: number) => void;
-  hydrate: () => void;
+  hydrate: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
-  token: null,
   user: null,
   balance: 0,
   isAuthenticated: false,
   loading: true,
 
-  hydrate: () => {
-    const token = localStorage.getItem("token");
-    const userStr = localStorage.getItem("user");
-    if (token && userStr) {
-      const user = JSON.parse(userStr);
-      set({ token, user, isAuthenticated: true, loading: false });
-      get().fetchUser();
+  hydrate: async () => {
+    try {
+      const { user } = await api.getUser();
+      localStorage.setItem("user", JSON.stringify(user));
+      set({ user, isAuthenticated: true, loading: false });
       get().fetchBalance();
-    } else {
-      set({ loading: false });
+    } catch {
+      localStorage.removeItem("user");
+      set({ user: null, isAuthenticated: false, loading: false });
     }
   },
 
@@ -50,10 +47,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       usdBalance: res.user.usdBalance,
       createdAt: res.user.createdAt,
     };
-    localStorage.setItem("token", res.token);
     localStorage.setItem("user", JSON.stringify(user));
     set({
-      token: res.token,
       user,
       balance: res.user.usdBalance / 100,
       isAuthenticated: true,
@@ -71,20 +66,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       usdBalance: res.user.usdBalance,
       createdAt: res.user.createdAt,
     };
-    localStorage.setItem("token", res.token);
     localStorage.setItem("user", JSON.stringify(user));
     set({
-      token: res.token,
       user,
       balance: res.user.usdBalance / 100,
       isAuthenticated: true,
     });
   },
 
-  logout: () => {
-    localStorage.removeItem("token");
+  logout: async () => {
+    try {
+      await api.logout();
+    } catch {
+      /* even if the call fails, clear local state */
+    }
     localStorage.removeItem("user");
-    set({ token: null, user: null, balance: 0, isAuthenticated: false });
+    set({ user: null, balance: 0, isAuthenticated: false });
   },
 
   fetchBalance: async () => {
@@ -92,7 +89,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const res = await api.getBalance();
       set({ balance: res.usd_balance / 100 });
     } catch {
-      /* token expired */
+      /* session expired */
     }
   },
 
@@ -102,7 +99,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       localStorage.setItem("user", JSON.stringify(user));
       set({ user });
     } catch {
-      /* token expired */
+      /* session expired */
     }
   },
 

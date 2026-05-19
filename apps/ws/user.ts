@@ -29,7 +29,6 @@ export class User {
     addEventListner() {
         this.client.on("message", (message:string) =>{
             const parsedMessage = JSON.parse(message);
-            console.log(parsedMessage)
             if (parsedMessage.method === "SUBSCRIBE") {
                 parsedMessage.params.forEach((x: string) => SubscriptionManager.getInstance().subscribe(this.id,x));
             }

@@ -46,7 +46,7 @@ function PnlCell({ trade }: { trade: TradeOpen }) {
 
   return (
     <span className={`tabular-nums font-medium ${isProfit ? "text-green" : "text-red"}`}>
-      {isProfit ? "+$" : "-$"}{formatNumber(Math.abs(pnl), 6)}
+      {isProfit ? "+$" : "-$"}{formatNumber(Math.abs(pnl))}
     </span>
   );
 }
@@ -62,7 +62,7 @@ function CurrentPriceCell({ trade }: { trade: TradeOpen }) {
 
   return (
     <span className="tabular-nums text-white">
-      {cp !== null ? formatNumber(cp, d) : "—"}
+      {cp !== null ? formatNumber(cp) : "—"}
     </span>
   );
 }
@@ -168,11 +168,11 @@ export default function Positions({
       // Show toast
       if (isProfit) {
         toast.success("Position closed (Target hit)", {
-          description: `Profit: +$${formatNumber(pnl, 6)}`,
+          description: `Profit: +$${formatNumber(pnl)}`,
         });
       } else {
         toast.error("Position closed (Stop hit)", {
-          description: `Loss: -$${formatNumber(Math.abs(pnl), 6)}`,
+          description: `Loss: -$${formatNumber(Math.abs(pnl))}`,
         });
       }
     };
@@ -189,11 +189,11 @@ export default function Positions({
       await Promise.all([loadOpen(), loadClosed(), fetchBalance()]);
       if (pnl >= 0) {
         toast.success("Position closed", {
-          description: `Profit: +$${formatNumber(pnl, 2)}`,
+          description: `Profit: +$${formatNumber(pnl)}`,
         });
       } else {
         toast.error("Position closed", {
-          description: `Loss: -$${formatNumber(Math.abs(pnl), 2)}`,
+          description: `Loss: -$${formatNumber(Math.abs(pnl))}`,
         });
       }
     } catch (err) {
@@ -261,10 +261,10 @@ export default function Positions({
                       </Badge>
                     </TableCell>
                     <TableCell className="px-4 py-2.5 text-right tabular-nums text-sm text-white">
-                      {formatNumber((trade.exposure / MARGIN_SCALE) / (trade.openPrice / s), 4)}
+                      {formatNumber((trade.exposure / MARGIN_SCALE) / (trade.openPrice / s))}
                     </TableCell>
                     <TableCell className="px-4 py-2.5 text-right tabular-nums text-sm text-white">
-                      ${formatNumber(trade.openPrice / s, d)}
+                      ${formatNumber(trade.openPrice / s)}
                     </TableCell>
                     <TableCell className="px-4 py-2.5 text-right text-sm">
                       $<CurrentPriceCell trade={trade} />
@@ -341,17 +341,17 @@ export default function Positions({
                       </Badge>
                     </TableCell>
                     <TableCell className="px-4 py-2.5 text-right tabular-nums text-sm text-white">
-                      {formatNumber((trade.exposure / MARGIN_SCALE) / (trade.openPrice / s), 4)}
+                      {formatNumber((trade.exposure / MARGIN_SCALE) / (trade.openPrice / s))}
                     </TableCell>
                     <TableCell className="px-4 py-2.5 text-right tabular-nums text-sm text-white">
-                      ${formatNumber(trade.openPrice / s, d)}
+                      ${formatNumber(trade.openPrice / s)}
                     </TableCell>
                     <TableCell className="px-4 py-2.5 text-right tabular-nums text-sm text-white">
-                      ${formatNumber(trade.closePrice / s, d)}
+                      ${formatNumber(trade.closePrice / s)}
                     </TableCell>
                     <TableCell className="px-3 py-2 text-right">
                       <span className={`tabular-nums font-medium ${isProfit ? "text-green" : "text-red"}`}>
-                        {isProfit ? "+$" : "-$"}{formatNumber(Math.abs(pnl), 6)}
+                        {isProfit ? "+$" : "-$"}{formatNumber(Math.abs(pnl))}
                       </span>
                     </TableCell>
                     </TableRow>

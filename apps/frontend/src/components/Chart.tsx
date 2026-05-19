@@ -100,6 +100,7 @@ export default function Chart({
       borderDownColor: "#ef4444",
       wickUpColor: "#22c55e80",
       wickDownColor: "#ef444480",
+      priceFormat: { type: "price", precision: 2, minMove: 0.01 },
     };
 
     const series = chart.addSeries(CandlestickSeries, candleOptions);

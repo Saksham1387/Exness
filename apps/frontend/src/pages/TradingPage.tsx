@@ -55,7 +55,7 @@ export default function TradingPage() {
         </div>
         {midPrice !== null && (
           <span className="text-sm text-muted tabular-nums ml-1">
-            ${formatNumber(midPrice, decimals)}
+            ${formatNumber(midPrice)}
           </span>
         )}
       </div>
