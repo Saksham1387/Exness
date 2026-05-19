@@ -16,6 +16,19 @@
         "turbo": "^2.9.14",
       },
     },
+    "apps/db": {
+      "name": "@exness/db-processor",
+      "dependencies": {
+        "@exness/db": "workspace:*",
+        "@exness/shared": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+      "peerDependencies": {
+        "typescript": "^5",
+      },
+    },
     "apps/frontend": {
       "name": "@exness/frontend",
       "version": "0.0.0",
@@ -219,6 +232,8 @@
     "@eslint/plugin-kit": ["@eslint/plugin-kit@0.7.1", "", { "dependencies": { "@eslint/core": "^1.2.1", "levn": "^0.4.1" } }, "sha512-rZAP3aVgB9ds9KOeUSL+zZ21hPmo8dh6fnIFwRQj5EAZl9gzR7wxYbYXYysAM8CTqGmUGyp2S4kUdV17MnGuWQ=="],
 
     "@exness/db": ["@exness/db@workspace:packages/db"],
+
+    "@exness/db-processor": ["@exness/db-processor@workspace:apps/db"],
 
     "@exness/frontend": ["@exness/frontend@workspace:apps/frontend"],
 
